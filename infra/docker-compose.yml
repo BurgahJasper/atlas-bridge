@@ -1,0 +1,40 @@
+# Atlas Bridge infrastructure — TRD §10.2 foundation layer.
+# v1 apps run on the host (node 20+); Compose ships ONLY the backing services:
+# Postgres (fact store) and Redis (reserved for the v1.5 distributed queue,
+# TRD §4/§10.2 — the analysis queue is in-process today).
+## Usage: docker compose up -d  then apply schema: see ../infra/README.md
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: atlas-postgres
+    environment:
+      POSTGRES_USER: atlasbridge
+      POSTGRES_PASSWORD: atlasbridge
+      POSTGRES_DB: atlasbridge
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atlasbridge"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: atlas-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # No persistence: Redis holds queues only (TTL semantics, TRD §6 data
+    # model note). Data of record lives in Postgres.
+
+volumes:
+  pgdata:

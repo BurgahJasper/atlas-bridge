@@ -1,0 +1,299 @@
+@import 'tailwindcss';
+
+/* ── Atlas Bridge design tokens (TRD §2.3) ──────────────────────────────────
+   Warm off-white (light) / deep midnight (dark), teal = exploration accent,
+   amber = historical change. WCAG AA contrast targets. Support both schemes
+   via prefers-color-scheme (v1: no manual theme toggle). */
+
+:root {
+  --ab-canvas: #FAF8F3;
+  --ab-surface: #FFFFFF;
+  --ab-raised: #F1EDE2;
+  --ab-ink: #1C1917;
+  --ab-muted: #57534E;
+  --ab-line: #E4DDCD;
+  --ab-action: #0E7490;
+  --ab-action-hover: #155E75;
+  --ab-action-soft: #E0F2F7;
+  --ab-action-text: #0E7490;
+  --ab-history: #B45309;
+  --ab-history-soft: #F7E8D8;
+  --ab-success: #15803D;
+  --ab-success-soft: #E3F4E9;
+  --ab-warning: #A16207;
+  --ab-warning-soft: #FBF0D3;
+  --ab-error: #B91C1C;
+  --ab-error-soft: #FBE8E8;
+  --ab-shadow: 0 1px 2px rgb(28 25 23 / 0.06), 0 4px 16px rgb(28 25 23 / 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ab-canvas: #0F1420;
+    --ab-surface: #151B2A;
+    --ab-raised: #1D2537;
+    --ab-ink: #EDEBE3;
+    --ab-muted: #9AA5B8;
+    --ab-line: #2A3348;
+    --ab-action: #22B8CF;
+    --ab-action-hover: #59D1E2;
+    --ab-action-soft: #11323A;
+    --ab-action-text: #7CD8E6;
+    --ab-history: #E8A05C;
+    --ab-history-soft: #2E2418;
+    --ab-success: #4ADE80;
+    --ab-success-soft: #12291B;
+    --ab-warning: #EAB308;
+    --ab-warning-soft: #2C2511;
+    --ab-error: #F87171;
+    --ab-error-soft: #2E1515;
+    --ab-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px rgb(0 0 0 / 0.35);
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--ab-canvas);
+  --color-surface: var(--ab-surface);
+  --color-raised: var(--ab-raised);
+  --color-ink: var(--ab-ink);
+  --color-muted: var(--ab-muted);
+  --color-line: var(--ab-line);
+  --color-action: var(--ab-action);
+  --color-action-hover: var(--ab-action-hover);
+  --color-action-soft: var(--ab-action-soft);
+  --color-action-text: var(--ab-action-text);
+  --color-history: var(--ab-history);
+  --color-history-soft: var(--ab-history-soft);
+  --color-success: var(--ab-success);
+  --color-success-soft: var(--ab-success-soft);
+  --color-warning: var(--ab-warning);
+  --color-warning-soft: var(--ab-warning-soft);
+  --color-error: var(--ab-error);
+  --color-error-soft: var(--ab-error-soft);
+  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Menlo, Consolas, monospace;
+}
+
+html {
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--ab-canvas);
+  color: var(--ab-ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  font-size: 1rem; /* body ≥16px (TRD §2.3) */
+  line-height: 1.5;
+}
+
+/* Display heading: 28–40px desktop, 24–30px mobile via clamp (TRD §2.3). */
+.ab-display {
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  font-weight: 650;
+}
+
+.ab-title {
+  font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.75rem);
+  line-height: 1.25;
+  font-weight: 640;
+}
+
+.ab-mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem; /* 13px code baseline */
+}
+
+/* Visible focus ring everywhere (TRD §2.3 Interaction). */
+:focus-visible {
+  outline: 2px solid var(--ab-action);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Skip link becomes visible when focused. */
+.ab-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--ab-surface);
+  color: var(--ab-ink);
+  padding: 12px 20px;
+  border: 2px solid var(--ab-action);
+}
+.ab-skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
+/* Button sizing: ≥44px targets (TRD §2.3); variants consume tokens. */
+.ab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.ab-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.ab-btn-primary {
+  background: var(--ab-action);
+  color: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  .ab-btn-primary {
+    color: #08131a;
+  }
+}
+.ab-btn-primary:hover:not(:disabled) {
+  background: var(--ab-action-hover);
+}
+.ab-btn-secondary {
+  background: var(--ab-surface);
+  color: var(--ab-ink);
+  border-color: var(--ab-line);
+}
+.ab-btn-secondary:hover:not(:disabled) {
+  border-color: var(--ab-action);
+}
+.ab-btn-ghost {
+  background: transparent;
+  color: var(--ab-action-text);
+}
+.ab-btn-ghost:hover:not(:disabled) {
+  background: var(--ab-action-soft);
+}
+.ab-btn-danger {
+  background: var(--ab-error-soft);
+  color: var(--ab-error);
+  border-color: color-mix(in srgb, var(--ab-error) 35%, transparent);
+}
+
+.ab-card {
+  background: var(--ab-surface);
+  border: 1px solid var(--ab-line);
+  border-radius: 14px;
+  box-shadow: var(--ab-shadow);
+}
+
+.ab-input {
+  min-height: 44px;
+  width: 100%;
+  background: var(--ab-surface);
+  color: var(--ab-ink);
+  border: 1px solid var(--ab-line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.ab-input::placeholder {
+  color: var(--ab-muted);
+}
+
+/* Badge chips for provenance / status. */
+.ab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  min-height: 22px;
+}
+
+/* Graph node enter animation (CSS class-based; honors reduced motion). */
+@keyframes ab-node-enter {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+.ab-node-enter {
+  animation: ab-node-enter 360ms ease-out;
+}
+
+@keyframes ab-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.ab-pulse {
+  animation: ab-pulse 1.6s ease-in-out infinite;
+}
+
+/* Skeleton shimmer. */
+@keyframes ab-shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+.ab-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--ab-raised) 25%, var(--ab-line) 50%, var(--ab-raised) 75%);
+  background-size: 200% 100%;
+  animation: ab-shimmer 1.4s linear infinite;
+}
+
+/* Reduced motion: OS setting AND in-app setting (data attribute on <html>).
+   TRD §2.5: animation honors prefers-reduced-motion and can be disabled. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+[data-ab-reduced-motion='true'] *,
+[data-ab-reduced-motion='true'] *::before,
+[data-ab-reduced-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+[data-ab-reduced-motion='true'] .ab-node-enter {
+  animation: none !important;
+}
+
+/* React Flow sizing/a11y adjustments. */
+.react-flow__controls-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.react-flow__attribution {
+  font-size: 10px;
+}
+
+/* Confine prose: no required horizontal scroll. */
+.ab-prose {
+  overflow-wrap: anywhere;
+  max-width: 70ch;
+}
+
+/* Diff rendering (prefix chars + tokens, never color-only — TRD a11y). */
+.ab-diff-add { color: var(--ab-success); background: color-mix(in srgb, var(--ab-success) 10%, transparent); }
+.ab-diff-del { color: var(--ab-error); background: color-mix(in srgb, var(--ab-error) 10%, transparent); }
+.ab-diff-ctx { color: var(--ab-muted); }

@@ -1,0 +1,28 @@
+{
+  "name": "atlas-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Understand any open-source codebase in your own language: visual Git-history stories that teach how software evolved, and guide you to your first real contribution.",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:worker": "npm run dev -w apps/worker",
+    "build": "npm run build -w apps/web",
+    "start": "npm run start -w apps/web",
+    "typecheck": "tsc --noEmit -p apps/web && tsc --noEmit -p apps/worker",
+    "test": "npm run test --workspaces --if-present",
+    "seed": "node scripts/generate-fixture.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
