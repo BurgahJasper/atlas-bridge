@@ -19,7 +19,9 @@
     "typecheck": "tsc --noEmit -p apps/web && tsc --noEmit -p apps/worker",
     "test": "npm run test --workspaces --if-present",
     "seed": "node scripts/generate-fixture.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "showcase:record": "node tools/showcase/record.mjs",
+    "showcase:narrate": "node tools/showcase/narrate.mjs"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
