@@ -53,9 +53,15 @@ const runtimeKey = '__atlas_web_pipeline__';
 function buildRuntime(): AtlasRuntime {
   const env = getEnv();
 
-  // Postgres when configured; otherwise a durable file log so analyses survive
-  // restarts without any infrastructure (ATLAS_DATA_DIR overrides the location).
-  const dataDir = process.env.ATLAS_DATA_DIR ?? path.resolve(process.cwd(), '..', '..', '.atlas-data');
+  // Postgres is the durable production backend. Vercel serverless functions
+  // cannot write to the deployed project directory, so use writable /tmp
+  // as a best-effort demo fallback when no database has been configured.
+  // /tmp is ephemeral and is NOT shared across function instances; configure
+  // DATABASE_URL before relying on saved analyses or learner progress.
+  const dataDir = process.env.ATLAS_DATA_DIR
+    ?? (process.env.VERCEL
+      ? path.join('/tmp', 'atlas-bridge')
+      : path.resolve(process.cwd(), '..', '..', '.atlas-data'));
   const store: Store = env.databaseUrl
     ? createPgStore(env.databaseUrl as string)
     : createFileStore(path.join(dataDir, 'store.jsonl'));
