@@ -98,6 +98,19 @@ function getRuntime(): AtlasRuntime {
   return g[runtimeKey]!;
 }
 
+/** Hydrate the pinned repository on API cold starts before serving its graphs,
+ * mission checks and hints. Vercel functions do not share process memory.
+ * This is a bounded, offline-fixture-only hackathon fallback.
+ */
+export async function ensureCuratedDemo(): Promise<void> {
+  if (process.env.VERCEL && getPipelineMode() === 'embedded') {
+    const existing = await getStore().getRepositoryBySlug('octokit', 'request.js');
+    if (!existing) {
+      await getPipeline().analyze({ url: 'https://github.com/octokit/request.js', locale: 'en' });
+    }
+  }
+}
+
 export function getPipeline(): AtlasPipeline {
   return getRuntime().pipeline;
 }

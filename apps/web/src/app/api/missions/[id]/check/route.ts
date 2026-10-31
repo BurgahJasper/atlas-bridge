@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LocaleSchema } from '@atlas/contracts';
-import { checkAndRecord } from '@/lib/pipeline';
+import { checkAndRecord, ensureCuratedDemo } from '@/lib/pipeline';
 import { ApiError } from '@/lib/errors';
 import { handle, jsonOk, readJsonBody } from '@/lib/api-utils';
 
@@ -21,6 +21,7 @@ const BodySchema = z.object({
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }): Promise<Response> {
   return handle(async () => {
+    await ensureCuratedDemo();
     const { id } = await params;
     const body = (await readJsonBody(request)) as unknown;
     const parsed = BodySchema.safeParse(body);
