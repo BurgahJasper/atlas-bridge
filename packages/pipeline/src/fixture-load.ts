@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { CuratedFixture } from '@atlas/github';
+import curatedDemo from './fixtures/octokit-request-js.json';
 
 /**
  * Curated fixture loader (TRD §10.1.2, §11 demo reliability).
@@ -25,6 +26,9 @@ function isCuratedFixtureShape(value: unknown): value is CuratedFixture {
 }
 
 export function loadCuratedFixture(name: string): CuratedFixture | null {
+  // Bundle the pinned hackathon fixture directly into serverless functions.
+  // Files outside Next.js route traces may otherwise be absent at runtime.
+  if (name === 'octokit-request-js') return isCuratedFixtureShape(curatedDemo) ? curatedDemo as unknown as CuratedFixture : null;
   try {
     const filePath = join(FIXTURES_DIR, `${name}.json`);
     const raw = readFileSync(filePath, 'utf8');
