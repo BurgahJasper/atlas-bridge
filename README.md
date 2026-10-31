@@ -1,5 +1,7 @@
 # Atlas Bridge
 
+**[Live demo](https://atlas-bridge-sand.vercel.app)** · [GitHub source](https://github.com/BurgahJasper/atlas-bridge)
+
 > Understand any open-source codebase in your own language: visual Git-history stories that teach how the software evolved — and guide you toward your first real contribution.
 
 Atlas Bridge turns unfamiliar open-source repositories into **visual, multilingual time-travel stories**. A deterministic engine extracts commits, diffs, and dependency facts; an AI layer (Gemma 4 via the Gemini API, optional) narrates what changed **with citations that always resolve to real evidence**. A guided mission takes a novice from "what is this repo?" to a validated first contribution — in **English or Spanish**.
@@ -35,7 +37,7 @@ To analyze other public repositories, set optional keys (copy `.env.example` to 
 | `GEMINI_API_KEY` | Enables real Gemma 4 inference (`gemma-4-26b-a4b-it` by default) |
 | `GEMMA_MODEL_ID` | Override the hosted model id |
 | `GEMMA_LOCAL_ADAPTER_URL` | Use a self-hosted Gemma runtime instead |
-| `DATABASE_URL` | Postgres persistence (default: durable file log in `.atlas-data/`) |
+| `DATABASE_URL` | Required for reliable Vercel serverless job polling and durable analysis results; local development uses a durable file log |
 | `ATLAS_DATA_DIR` | Where the file log lives (default: `.atlas-data/` at the repo root) |
 | `ANALYSIS_MODE` | `embedded` (default) or `worker` |
 | `WORKER_URL` | Worker base URL when `ANALYSIS_MODE=worker` |
@@ -53,6 +55,10 @@ docker compose -f infra/docker-compose.yml up -d   # Postgres + Redis
 npm run dev:worker                                  # analysis service on :4600
 # then set ANALYSIS_MODE=worker and WORKER_URL=http://localhost:4600
 ```
+
+## Vercel deployment
+
+The public application is available at **https://atlas-bridge-sand.vercel.app**. Configure `GEMINI_API_KEY` for hosted Gemma explanations and optional read-only `GITHUB_TOKEN` to raise GitHub API limits. For reliable arbitrary-repository analysis on Vercel, configure `DATABASE_URL` for shared PostgreSQL storage and run analysis on a durable worker. The local `/tmp` fallback is ephemeral and must not be presented as durable or reliable across serverless requests.
 
 ## Architecture
 
