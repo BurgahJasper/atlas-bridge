@@ -41,9 +41,11 @@ export function AnalysisGate({ slug, jobId: initialJobId, locale, autoStart }: A
   const router = useRouter();
   const [state, setState] = useState<GateState>({ ...INITIAL, jobId: initialJobId ?? null });
   const startedRef = useRef(false);
+  const lastProgressRef = useRef(Date.now());
 
   const startAnalysis = useCallback(async () => {
     startedRef.current = true;
+    lastProgressRef.current = Date.now();
     setState((prev) => ({ ...prev, status: 'starting', error: null }));
     try {
       const ref = slug.split('__');
@@ -74,6 +76,11 @@ export function AnalysisGate({ slug, jobId: initialJobId, locale, autoStart }: A
       try {
         const job = await apiJson<AnalysisJob>(`/api/jobs/${encodeURIComponent(state.jobId ?? '')}`);
         if (cancelled) return;
+        if (job.stage !== state.stage || job.progress !== state.progress) lastProgressRef.current = Date.now();
+        if ((job.status === 'queued' || job.status === 'running') && Date.now() - lastProgressRef.current > 45000) {
+          setState((prev) => ({ ...prev, status: 'error', error: 'Analysis stalled. On Vercel, configure shared DATABASE_URL and a durable analysis worker; a GitHub token alone does not fix serverless background jobs.' }));
+          return;
+        }
         setState((prev) => ({
           ...prev,
           status: job.status,
@@ -105,7 +112,7 @@ export function AnalysisGate({ slug, jobId: initialJobId, locale, autoStart }: A
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [state.jobId, state.status, router, slug, locale]);
+  }, [state.jobId, state.status, state.stage, state.progress, router, slug, locale]);
 
   if (state.status === 'done') {
     return (
