@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { getPipeline } from '@/lib/pipeline';
 import { ApiError } from '@/lib/errors';
-import { getOverviewBySlug } from '@/lib/pipeline';
+import { getOverviewBySlug, ensureCuratedDemo } from '@/lib/pipeline';
 import { handle, jsonOk, parseQuery } from '@/lib/api-utils';
 
 // TRD §6.1: GET /api/snapshots/:sha/graph?repositoryId= — provenance-backed
@@ -13,6 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ sha: string }> },
 ): Promise<Response> {
   return handle(async () => {
+    await ensureCuratedDemo();
     const { sha } = await params;
     const query = parseQuery(z.object({ repositoryId: z.string().min(1) }), new URL(request.url));
     const resolved = await getOverviewBySlug(query.repositoryId);
