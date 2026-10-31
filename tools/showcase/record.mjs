@@ -59,7 +59,7 @@ const context = await browser.newContext({
   recordVideo: { dir: join(outDir, 'raw'), size: { width: 1280, height: 720 } },
   locale: 'en-US',
 });
-await context.addCookies([{ name: 'ab-locale', value: 'es', url: BASE }]);
+await context.addCookies([{ name: 'ab-locale', value: 'en', url: BASE }]);
 await context.addInitScript(CURSOR_SCRIPT);
 const page = await context.newPage();
 let frame = 0;
@@ -101,7 +101,7 @@ const pause = (ms) => page.waitForTimeout(ms);
 await step('intro', async () => {
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
   await caption('Atlas Bridge: understand how an open-source project evolved, in your own language, with every claim linked to real evidence.', 5000);
-  await caption('The interface starts in Spanish. Every screen is localized, not just the headings.');
+  await caption('The interface starts in English. Every screen is fully localized — including Spanish.');
 });
 
 await step('overview', async () => {
@@ -121,7 +121,7 @@ await step('history-scrub', async () => {
 });
 
 await step('node-inspector', async () => {
-  await page.getByRole('button', { name: /lista de nodos|node list/i }).first().click();
+  await page.getByRole('button', { name: /node list|lista de nodos/i }).first().click();
   await pause(800);
   await page.locator('ul[aria-label] button').nth(2).click();
   await pause(1200);
@@ -129,9 +129,9 @@ await step('node-inspector', async () => {
 });
 
 await step('language-switch', async () => {
-  await page.locator('[role="group"] button').filter({ hasText: 'EN' }).first().click();
+  await page.locator('[role="group"] button').filter({ hasText: 'ES' }).first().click();
   await pause(1200);
-  await caption('Switching to English keeps the same milestone and the same selection. Code, paths and SHAs are never translated.', 4500);
+  await caption('Switching to Spanish keeps the same milestone and the same selection. Code, paths and SHAs are never translated.', 4500);
 });
 
 await step('evidence', async () => {
