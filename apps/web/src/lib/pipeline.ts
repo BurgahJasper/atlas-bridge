@@ -74,11 +74,8 @@ function buildRuntime(): AtlasRuntime {
   // Embedded (demo default). createAutoProvider degrades cleanly to the
   // offline fixture provider when no key is configured; the web layer only
   // reads its `offline` flag for disclosure (never consumes secrets here).
-  // The pinned demo stays deterministic and self-contained on serverless.
-  // Live Gemma remains available for local/worker deployments; the public
-  // serverless fixture uses the visibly labeled offline provider instead.
   const aiProvider = createAutoProvider({
-    apiKey: process.env.VERCEL ? undefined : (env.geminiApiKey ?? undefined),
+    apiKey: env.geminiApiKey ?? undefined,
     localAdapterUrl: env.gemmaLocalAdapterUrl ?? undefined,
     modelId: env.gemmaModelId,
   });
