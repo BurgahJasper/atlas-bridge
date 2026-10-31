@@ -194,6 +194,20 @@ export async function getOverviewBySlug(
     if (overview) return { ...overview, repositoryId: id };
   }
 
+  // The curated demo is reconstructed locally from the committed fixture on
+  // every cold serverless invocation. The analysis is awaited for this one
+  // fixture (see analyzeJob); no database, background worker, or GitHub key.
+  if (process.env.VERCEL && slug === 'octokit__request.js') {
+    await getPipeline().analyze({
+      url: 'https://github.com/octokit/request.js',
+      locale: opts.locale ?? 'en',
+    });
+    for (const id of ids) {
+      const overview = await tryOverview(id);
+      if (overview) return { ...overview, repositoryId: id };
+    }
+  }
+
   // Self-heal (opt-in, bounded): kick off an analysis and poll briefly, then
   // retry resolution. Page renders gate ongoing progress client-side.
   if (opts.selfHeal) {
