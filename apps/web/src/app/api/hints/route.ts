@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Locale, MissionStep } from '@atlas/contracts';
-import { getOverviewBySlug, getPipeline } from '@/lib/pipeline';
+import { getOverviewBySlug, getPipeline, ensureCuratedDemo } from '@/lib/pipeline';
 import { t } from '@/lib/i18n';
 import { ApiError } from '@/lib/errors';
 import { handle, jsonOk, readJsonBody } from '@/lib/api-utils';
@@ -57,6 +57,7 @@ function buildHint(
 
 export async function POST(request: Request): Promise<Response> {
   return handle(async () => {
+    await ensureCuratedDemo();
     const body = (await readJsonBody(request)) as unknown;
     const parsed = BodySchema.safeParse(body);
     if (!parsed.success) {
