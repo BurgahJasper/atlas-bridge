@@ -1,5 +1,6 @@
 # Atlas Bridge
 
+**[Hackathon presentation](https://docs.google.com/presentation/d/1rFV2M2RUAAWfqWrYR41WCUKn0yRgAQDy60lxbMLdahk/edit)**
 **[Live demo](https://atlas-bridge-sand.vercel.app)** · [GitHub source](https://github.com/BurgahJasper/atlas-bridge)
 
 > Understand any open-source codebase in your own language: visual Git-history stories that teach how the software evolved — and guide you toward your first real contribution.
