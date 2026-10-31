@@ -18,12 +18,12 @@ mkdirSync(audioDir, { recursive: true });
 // The text is spoken ONCE per frame; there is NO overlap.
 const segments = [
   { id: '01', text: 'Welcome to Atlas Bridge. It turns unfamiliar open-source repositories into visual stories that teach how the software evolved, and guide you toward your first real contribution.' },
-  { id: '02', text: 'The interface is fully localized. Here it is in Spanish. Every screen is translated, not just the headings.' },
+  { id: '02', text: 'The interface starts in English. Every screen is fully localized, including Spanish, not just the headings.' },
   { id: '03', text: 'Overview page. The real owner, license, default branch, and the bounded analysis scope are stated up front.' },
   { id: '04', text: 'Time Travel. Each stop on the timeline is a real Git commit. The graph maps files and their actual import edges.' },
   { id: '05', text: 'Keyboard navigation scrubs between milestones. The before and after labels update with each step.' },
   { id: '06', text: 'Click any file. Its real imports and importers appear, with architecture explanation citing the source.' },
-  { id: '07', text: 'Switching to English preserves the same milestone and selection. Code paths and commit hashes are never translated.' },
+  { id: '07', text: 'Switching languages preserves the same milestone and selection. Code paths and commit hashes are never translated.' },
   { id: '08', text: 'Every claim shows provenance. Explicit means the commit message says it. Inferred means derived from the diff, and is never marked high confidence.' },
   { id: '09', text: 'Learning trail. One lesson per milestone with interactive checkpoints verified against the commit.' },
   { id: '10', text: 'Contribute. Missions come from real changes in this repository, not generic questions.' },

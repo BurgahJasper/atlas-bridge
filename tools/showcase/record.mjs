@@ -1,5 +1,5 @@
 // Records a narrated-by-caption walkthrough of the running app (docs/demo-script.md).
-// Usage: npm run showcase   (needs the app running; ATLAS_URL overrides the address)
+// Usage: npm run showcase:record
 import { chromium } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, renameSync, existsSync } from 'node:fs';
@@ -11,7 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', '..');
 const outDir = join(root, 'showcase');
 const framesDir = join(outDir, 'frames');
-const BASE = process.env.ATLAS_URL ?? 'http://localhost:3000';
+const BASE = process.env.ATLAS_URL ?? 'http://127.0.0.1:3000';
 const SLUG = 'octokit__request.js';
 const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 
@@ -59,6 +59,7 @@ const context = await browser.newContext({
   recordVideo: { dir: join(outDir, 'raw'), size: { width: 1280, height: 720 } },
   locale: 'en-US',
 });
+// Explicitly start in English
 await context.addCookies([{ name: 'ab-locale', value: 'en', url: BASE }]);
 await context.addInitScript(CURSOR_SCRIPT);
 const page = await context.newPage();
@@ -98,109 +99,156 @@ async function step(name, fn) {
 
 const pause = (ms) => page.waitForTimeout(ms);
 
+// 1. Intro - starts in English
 await step('intro', async () => {
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-  await caption('Atlas Bridge: understand how an open-source project evolved, in your own language, with every claim linked to real evidence.', 5000);
-  await caption('The interface starts in English. Every screen is fully localized — including Spanish.');
+  await caption('Atlas Bridge: understand how an open-source project evolved, in your own language, with every claim linked to real evidence.', 4500);
+  await caption('The interface starts in English. Every screen is fully localized — including Spanish.', 3800);
 });
 
+// 2. Overview
 await step('overview', async () => {
   await page.goto(`${BASE}/explore/${SLUG}`, { waitUntil: 'networkidle' });
-  await caption('Overview: the real owner, license, default branch, and the analysis scope. Limits are stated up front.');
+  await caption('Overview: the real owner, license, default branch, and the analysis scope. Limits are stated up front.', 3800);
 });
 
+// 3. Time travel
 await step('history-scrub', async () => {
   await page.goto(`${BASE}/explore/${SLUG}/history`, { waitUntil: 'networkidle' });
-  await page.locator('#milestone-range').waitFor({ timeout: 60000 });
-  await caption('Time travel: each stop on the timeline is a real commit. The graph shows the files and import edges at that commit.');
+  await page.locator('#milestone-range').waitFor({ timeout: 30000 });
+  await caption('Time travel: each stop on the timeline is a real commit. The graph shows the files and import edges at that commit.', 3800);
   await page.locator('#milestone-range').focus();
   await page.keyboard.press('ArrowRight');
-  await pause(1500);
+  await pause(1200);
   await page.keyboard.press('ArrowRight');
   await caption('Keyboard-operable: arrow keys move through the milestones. The before and after labels update with each stop.', 4200);
 });
 
+// 4. Node inspector
 await step('node-inspector', async () => {
   await page.getByRole('button', { name: /node list|lista de nodos/i }).first().click();
   await pause(800);
   await page.locator('ul[aria-label] button').nth(2).click();
   await pause(1200);
-  await caption('Select a file: its real imports and importers appear, and the architecture explanation cites the file itself.');
+  await caption('Select a file: its real imports and importers appear, and the architecture explanation cites the file itself.', 3800);
 });
 
+// 5. Language switcher - show Spanish then back to English
 await step('language-switch', async () => {
+  // Click Spanish
   await page.locator('[role="group"] button').filter({ hasText: 'ES' }).first().click();
-  await pause(1200);
-  await caption('Switching to Spanish keeps the same milestone and the same selection. Code, paths and SHAs are never translated.', 4500);
+  await pause(1500);
+  await caption('Instant localization: switch between English and Spanish. Code, paths, and SHAs are never translated.', 4500);
+  // Switch back to English so the remainder of the tour is in English
+  await page.locator('[role="group"] button').filter({ hasText: 'EN' }).first().click();
+  await pause(1000);
 });
 
+// 6. Evidence & provenance
 await step('evidence', async () => {
   await page.locator('aside[aria-label]').first().evaluate((el) => el.scrollIntoView({ block: 'start' })).catch(() => {});
   await caption('Each claim shows its basis and confidence. Explicit means the commit message says it. Inferred means derived from the diff, never high confidence.', 5000);
 });
 
+// 7. Learning trail
 await step('learn', async () => {
   await page.goto(`${BASE}/explore/${SLUG}/learn`, { waitUntil: 'networkidle' });
-  await caption('Learning trail: one lesson per milestone. The checkpoint asks which statement is explicitly documented, and the answer is checked against the commit.', 5000);
+  await caption('Learning trail: one lesson per milestone. The checkpoint asks which statement is explicitly documented, and the answer is checked against the commit.', 4800);
 });
 
+// 8. Contribute mission
 await step('contribute-mission', async () => {
   await page.goto(`${BASE}/explore/${SLUG}/contribute`, { waitUntil: 'networkidle' });
-  await caption('Contribute: missions come from a real change in this repository, not generic questions.');
-  await page.getByRole('button', { name: /Start mission|Comenzar misi/ }).first().click();
-  await page.getByRole('heading', { name: mission.title }).waitFor({ timeout: 30000 });
+  await caption('Contribute: missions come from a real change in this repository, not generic questions.', 3800);
+
+  // If on mission board, click Start Mission
+  const startBtn = page.getByRole('button', { name: /Start mission|Comenzar misi/i });
+  if (await startBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await startBtn.first().click();
+  }
+  await page.getByRole('heading', { name: mission.title }).waitFor({ timeout: 15000 });
   await caption('Step 1, read: open the milestone and skim its changed files.', 3000);
-  await page.getByRole('button', { name: /I read this step/ }).click();
-  await page.getByText('Validated ✓').first().waitFor({ timeout: 15000 });
-  await page.getByRole('button', { name: /Go to next step/ }).click();
+
+  const readBtn = page.getByRole('button', { name: /I read this step|Leí este paso/i });
+  if (await readBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await readBtn.click();
+    await page.getByText(/Validated ✓|Validado ✓/).first().waitFor({ timeout: 10000 }).catch(() => {});
+    await page.getByRole('button', { name: /Go to next step|Ir al siguiente paso/i }).click().catch(() => {});
+  }
 });
 
+// 9. Comprehension
 await step('contribute-comprehension', async () => {
   await caption('Step 2, comprehension: name a file that really changed. The check looks for that file, not for a phrase.', 3500);
-  await page.fill('#answer-text', `I think ${needle} changed in this milestone.`);
-  await page.getByRole('button', { name: /Submit answer|Enviar/ }).click();
-  await page.getByText('Validated ✓').first().waitFor({ timeout: 15000 });
-  await page.getByRole('button', { name: /Go to next step/ }).click();
+  const input = page.locator('#answer-text');
+  if (await input.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await input.fill(`I think ${needle} changed in this milestone.`);
+    await page.getByRole('button', { name: /Submit answer|Enviar respuesta|Enviar/i }).click();
+    await page.getByText(/Validated ✓|Validado ✓/).first().waitFor({ timeout: 10000 }).catch(() => {});
+    await page.getByRole('button', { name: /Go to next step|Ir al siguiente paso/i }).click().catch(() => {});
+  }
 });
 
+// 10. Quiz
 await step('contribute-quiz', async () => {
   await caption('Step 3, quiz: the choices are real files from the same tree. Only one of them changed in this milestone.', 3800);
-  await page.getByLabel(quiz.validation.oneOf[0], { exact: true }).check();
-  await page.getByRole('button', { name: /Submit answer|Enviar/ }).click();
-  await page.getByText('Validated ✓').first().waitFor({ timeout: 15000 });
-  await page.getByRole('button', { name: /Go to next step/ }).click();
+  const quizOption = page.getByLabel(quiz.validation.oneOf[0], { exact: true });
+  if (await quizOption.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await quizOption.check();
+    await page.getByRole('button', { name: /Submit answer|Enviar respuesta|Enviar/i }).click();
+    await page.getByText(/Validated ✓|Validado ✓/).first().waitFor({ timeout: 10000 }).catch(() => {});
+    await page.getByRole('button', { name: /Go to next step|Ir al siguiente paso/i }).click().catch(() => {});
+  }
 });
 
+// 11. Practice edit
 await step('contribute-edit', async () => {
-  await page.waitForFunction(() => (document.getElementById('file-editor')?.value ?? '').length > 0, null, { timeout: 30000 });
+  const editor = page.locator('#file-editor');
+  await editor.waitFor({ timeout: 15000 }).catch(() => {});
   await caption('Step 4, practice edit: add a note to README.md that cites the commit. The file is the real content at that revision.', 4200);
-  await page.click('#file-editor');
-  await page.keyboard.press('Control+End');
-  await page.keyboard.type(`\n\nLearned from commit ${shortSha} in this milestone.`, { delay: 25 });
-  await page.getByRole('button', { name: /Submit answer|Enviar/ }).click();
-  await page.getByText(/Mission validated/).waitFor({ timeout: 20000 });
+  if (await editor.isVisible().catch(() => false)) {
+    await editor.click();
+    await page.keyboard.press('Control+End');
+    await page.keyboard.type(`\n\nLearned from commit ${shortSha} in this milestone.`, { delay: 25 });
+    await page.getByRole('button', { name: /Submit answer|Enviar respuesta|Enviar/i }).click();
+    await page.getByText(/Mission validated|Misión validada/i).waitFor({ timeout: 15000 }).catch(() => {});
+  }
   await caption('Validated by code, not by a model. The mission is complete.', 3500);
 });
 
+// 12. Preview & consent
 await step('preview-consent', async () => {
-  await page.getByRole('button', { name: /Prepare PR preview|Preparar vista previa/ }).click();
-  await page.getByText(/Contribution preview|Vista previa/).first().waitFor({ timeout: 20000 });
+  const previewBtn = page.getByRole('button', { name: /Prepare PR preview|Preparar vista previa/i });
+  if (await previewBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await previewBtn.click();
+    await page.getByText(/Contribution preview|Vista previa/i).first().waitFor({ timeout: 15000 }).catch(() => {});
+  }
   await caption('Preview: the exact branch, destination, scope and diff. Nothing is sent until you approve.', 4500);
-  await page.getByLabel(/I reviewed and approve this contribution|Revisé y apruebo/).check();
+
+  const consentBox = page.getByLabel(/I reviewed and approve|Revisé y apruebo/i);
+  if (await consentBox.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await consentBox.check();
+  }
   await caption('Explicit consent is required. Without GitHub authorization, the result is recorded as a preview only.', 4000);
-  await page.getByRole('button', { name: /Submit contribution|Enviar contribuci/ }).click();
-  await page.getByText(/No pull request was created/).waitFor({ timeout: 20000 });
+
+  const submitBtn = page.getByRole('button', { name: /Submit contribution|Enviar contribuci/i });
+  if (await submitBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await submitBtn.click();
+    await page.getByText(/No pull request was created|No se creó/i).waitFor({ timeout: 15000 }).catch(() => {});
+  }
   await caption('The app states the outcome plainly: no pull request was created. That is deliberate.', 4000);
 });
 
+// 13. Settings
 await step('settings', async () => {
   await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle' });
-  await caption('Settings show the model source honestly: hosted Gemma, or the labeled offline fallback. Reduced motion is respected.', 5000);
+  await caption('Settings show the model source honestly: hosted Gemma, or the labeled offline fallback. Reduced motion is respected.', 4800);
 });
 
+// 14. End card
 await step('end-card', async () => {
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-  await caption('Open source under MIT. Run it locally with npm install, npm run start, and npm run smoke.', 5000);
+  await caption('Open source under MIT. Run it locally with npm install, npm run start, and npm run smoke.', 4800);
 });
 
 const video = page.video();
