@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { loadCuratedFixture } from '@atlas/pipeline';
 
 /**
  * Offline file-content access for the curated fixture repository (TRD §10.1:
@@ -29,6 +30,7 @@ function fixtureCandidates(fixtureName: string): string[] {
 const fixtureCache = new Map<string, unknown | null>();
 
 async function loadFixtureJson(fixtureName: string): Promise<unknown | null> {
+  if (fixtureName === CURATED_FIXTURE_NAME) return loadCuratedFixture(fixtureName);
   if (fixtureCache.has(fixtureName)) return fixtureCache.get(fixtureName) ?? null;
   for (const file of fixtureCandidates(fixtureName)) {
     try {

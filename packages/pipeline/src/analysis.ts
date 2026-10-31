@@ -116,15 +116,21 @@ export async function analyzeJob(
     return { jobId: job.id };
   }
   await ctx.store.putJob(job);
-  // Exception-safety: the run continues in the background; callers poll the
-  // job registry (TRD §6.1 /api/jobs/:id). All failure paths write a terminal
-  // job state to the store.
-  void runAnalysis(ctx, job, parsed.owner, parsed.name).catch(async (err) => {
+  // Vercel can suspend an invocation after its HTTP response. For the pinned
+  // hackathon fixture, finish ingestion before responding, so the demo never
+  // depends on a detached background promise surviving in a serverless worker.
+  const work = runAnalysis(ctx, job, parsed.owner, parsed.name).catch(async (err) => {
     job.status = 'error';
     job.error = errorMessage(err);
     job.updatedAt = new Date().toISOString();
     await ctx.store.putJob(job);
   });
+  if (process.env.VERCEL && ctx.fixture?.repository.owner === parsed.owner &&
+      ctx.fixture.repository.name === parsed.name) {
+    await work;
+  } else {
+    void work;
+  }
   return { jobId: job.id };
 }
 
