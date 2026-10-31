@@ -6,6 +6,19 @@
 
 Atlas Bridge turns unfamiliar open-source repositories into **visual, multilingual time-travel stories**. A deterministic engine extracts commits, diffs, and dependency facts; an AI layer (Gemma 4 via the Gemini API, optional) narrates what changed **with citations that always resolve to real evidence**. A guided mission takes a novice from "what is this repo?" to a validated first contribution — in **English or Spanish**.
 
+## Try the interactive demo
+
+**[Launch Atlas Bridge](https://atlas-bridge-sand.vercel.app)** — no installation or local server needed.
+
+1. On the homepage, click **Open curated repository** (the `octokit/request.js` example). This is the recommended path for trying the project.
+2. Click **Start here** to explore the **Time travel** timeline. Select milestones and inspect the architecture graph, file changes, and linked GitHub commits.
+3. Switch between **EN** and **ES** to try multilingual explanations.
+4. Open **Learn** and **Contribute** to test guided missions, comprehension checks, hints, and practice edits.
+
+**Please try the interactive controls!** Click an action **once**, then give it time to finish loading before clicking again. AI-generated explanations can take longer to appear while the model processes the request, especially on the first attempt. Wait for a response or an error message rather than repeatedly submitting the same action.
+
+The curated example uses pinned repository evidence and can fall back to clearly labeled offline explanations. An optional live AI response is not guaranteed for every action. Analyzing arbitrary public GitHub repositories is experimental in the hosted hackathon demo; use the curated example for the most reliable experience.
+
 ## Features
 
 - **Time travel** — scrub a keyboard-operable milestone timeline and watch the architecture graph change between real commits. Every milestone maps to an actual SHA.
